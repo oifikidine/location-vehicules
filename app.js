@@ -76,13 +76,29 @@ const optionsConnexionBaseDeDonnees = {
 // Middleware de connexion : chaque requete aura accès à la BDD
 app.use(myConnection(mysql2, optionsConnexionBaseDeDonnees, 'pool'));
 
-// ====================================================
-// ROUTES (on les ajoutera a l etape 6)
-// ====================================================
-// Route d'accueil - pour tester que le serveur marche
+// Route de test temporaire pour verifier la connexion BDD 
 app.get('/', (req, res) => {
-    res.render('accueil');
+ // req.getConnection vient du middleware express-myconnection
+ req.getConnection((err, connection) => {
+ if (err) {
+ console.log('Erreur connexion BDD :', err);
+ return res.send('Erreur de connexion a la base de donnees');
+ }
+ // On fait une requete simple pour tester
+ connection.query('SELECT * FROM vehicules', (err, resultats) => {
+ if (err) {
+ console.log('Erreur requete :', err);
+ return res.send('Erreur dans la requete SQL');
+ }
+ // On affiche les resultats dans le terminal
+ console.log('Vehicules trouves :', resultats);
+ // On envoie les resultats a la page EJS
+ res.render('accueil', { vehicules: resultats });
+ });
+ });
 });
+
+
 
 // ====================================================
 // EXPORT : on exporte app pour que server.js puisse l'utiliser

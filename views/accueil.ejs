@@ -7,7 +7,10 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <h1> Bienvenue sur Location Vehicules</h1>
-    <p>Le site fonctionne !</p>
+   <h1>Bienvenue - Test connexion BDD</h1> 
+<!-- EJS : on boucle sur le tableau vehicules -->
+<% vehicules.forEach(function(v) { %>
+ <p><%= v.marque %> <%= v.modele %> - <%= v.prix_journalier %> euros/jour</p>
+<% }); %>
 </body>
 </html>
