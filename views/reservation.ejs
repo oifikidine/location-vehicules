@@ -1,0 +1,11 @@
+<h1>Reserver : <%= vehicule.marque %> <%= vehicule.modele %></h1> EJS
+<p>Prix : <%= vehicule.prix_journalier %> euros / jour</p>
+<form method="POST" action="/reservation">
+ <!-- Champ cache : on envoie l id du vehicule sans l afficher -->
+ <input type="hidden" name="id_vehicule" value="<%= vehicule.id %>">
+ <label for="date_debut">Date de debut :</label>
+ <input type="date" id="date_debut" name="date_debut" required>
+ <label for="date_fin">Date de fin :</label>
+ <input type="date" id="date_fin" name="date_fin" required>
+ <button type="submit">Confirmer la reservation</button>
+</form>

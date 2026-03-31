@@ -1,0 +1,25 @@
+<h1>Mes reservations</h1> EJS
+<% if (reservations.length === 0) { %>
+ <p>Vous n avez pas encore de reservation.</p>
+<% } else { %>
+ <table>
+ <thead>
+ <tr>
+ <th>Vehicule</th>
+ <th>Date debut</th>
+ <th>Date fin</th>
+ <th>Prix / jour</th>
+ </tr>
+ </thead>
+ <tbody>
+ <% reservations.forEach(function(r) { %>
+ <tr>
+ <td><%= r.marque %> <%= r.modele %></td>
+ <td><%= r.date_debut.toLocaleDateString('fr-FR') %></td>
+ <td><%= r.date_fin.toLocaleDateString('fr-FR') %></td>
+ <td><%= r.prix_journalier %> euros</td>
+ </tr>
+ <% }); %>
+ </tbody>
+ </table>
+<% } %>
