@@ -99,6 +99,185 @@ app.get('/', (req, res) => {
 });
 
 
+// ====================================================
+// ROUTE : afficher les vehicules disponibles
+// Methode : GET (on RECUPERE des donnees)
+// URL : /vehicules
+// ====================================================
+app.get('/vehicules', (req, res) => {
+ req.getConnection((err, connection) => {
+ if (err) {
+ return res.status(500).send('Erreur serveur');
+ }
+ // On recupere uniquement les vehicules disponibles
+ connection.query(
+ 'SELECT * FROM vehicules WHERE disponible = 1',
+ (err, vehicules) => {
+ if (err) {
+ return res.status(500).send('Erreur requete');
+ }
+ // On envoie les donnees a la vue EJS
+ res.render('vehicules', { vehicules: vehicules });
+ }
+ );
+ });
+});
+
+//=================================================
+// Afficher le formulaire d inscription 
+//=================================================
+
+app.get('/inscription', (req, res) => {
+ res.render('inscription');
+});
+
+//==========================================
+// Traiter le formulaire d inscription 
+//==========================================
+// Methode : POST (on ENVOIE des donnees)
+app.post('/inscription', (req, res) => {
+ // req.body contient les donnees du formulaire
+ // grace au middleware express.urlencoded()
+ const nom = req.body.nom;
+ const prenom = req.body.prenom;
+ const email = req.body.email;
+ const mot_de_passe = req.body.mot_de_passe;
+ req.getConnection((err, connection) => {
+ if (err) {
+ return res.status(500).send('Erreur serveur');
+ }
+ // Les ? seront remplaces par les valeurs du tableau
+ // Dans l ordre : ?, ?, ?, ? = nom, prenom, email, mot_de_passe
+ connection.query(
+ 'INSERT INTO clients (nom, prenom, email, mot_de_passe) VALUES (?, ?, ?, ?)',
+ [nom, prenom, email, mot_de_passe],
+ (err, resultat) => {
+ if (err) {
+ console.log('Erreur inscription :', err);
+ return res.status(500).send('Erreur lors de l inscription');
+ }
+ // Inscription reussie : on redirige vers la page de connexion
+ res.redirect('/connexion');
+ }
+ );
+ });
+});
+
+// ===============================================
+// Afficher le formulaire de connexion JavaScript
+//================================================
+app.get('/connexion', (req, res) => {
+ res.render('connexion');
+});
+
+// =================================================
+// Traiter la connexion
+// =================================================
+app.post('/connexion', (req, res) => {
+ const email = req.body.email;
+ const mot_de_passe = req.body.mot_de_passe;
+ req.getConnection((err, connection) => {
+ if (err) {
+ return res.status(500).send('Erreur serveur');
+ }
+ connection.query(
+ 'SELECT * FROM clients WHERE email = ? AND mot_de_passe = ?',
+ [email, mot_de_passe],
+ (err, resultats) => {
+ if (err) {
+ return res.status(500).send('Erreur requete');
+ }
+ // Si on trouve un client avec cet email et ce mot de passe
+ if (resultats.length > 0) {
+ // On stocke les infos du client dans la session
+ req.session.client = resultats[0];
+ res.redirect('/vehicules');
+ } else {
+ res.send('Email ou mot de passe incorrect');
+ }
+ }
+ );
+ });
+});
+
+// =============================================================
+// Afficher le formulaire de reservation pour un vehicule precis
+// =============================================================
+
+// :id est un parametre dynamique dans l URL
+// Ex : /reservation/3 => req.params.id = 3
+app.get('/reservation/:id', (req, res) => {
+ if (!req.session.client) {
+ return res.redirect('/connexion');
+ }
+ req.getConnection((err, connection) => {
+ if (err) { return res.status(500).send('Erreur serveur'); }
+ connection.query(
+ 'SELECT * FROM vehicules WHERE id = ?',
+ [req.params.id],
+ (err, resultats) => {
+ if (err) { return res.status(500).send('Erreur requete'); }
+ res.render('reservation', { vehicule: resultats[0] });
+ }
+ );
+ });
+});
+
+
+// =====================================================
+// Traiter la reservation 
+// =====================================================
+
+app.post('/reservation', (req, res) => {
+ if (!req.session.client) {
+ return res.redirect('/connexion');
+ }
+ const id_client = req.session.client.id;
+ const id_vehicule = req.body.id_vehicule;
+ const date_debut = req.body.date_debut;
+ const date_fin = req.body.date_fin;
+ req.getConnection((err, connection) => {
+ if (err) { return res.status(500).send('Erreur serveur'); }
+ connection.query(
+ 'INSERT INTO reservations (id_client, id_vehicule, date_debut, date_fin) VALUES (?, ?, ?, ?)',
+ [id_client, id_vehicule, date_debut, date_fin],
+ (err, resultat) => {
+ if (err) { return res.status(500).send('Erreur reservation'); }
+ res.redirect('/mes-reservations');
+ }
+ );
+ });
+});
+ 
+// ============================================
+// Afficher les reservations du client connecte
+// ============================================
+app.get('/mes-reservations', (req, res) => {
+ if (!req.session.client) {
+ return res.redirect('/connexion');
+ }
+ req.getConnection((err, connection) => {
+ if (err) {
+ return res.status(500).send('Erreur serveur');
+ }
+ // JOIN : on recupere les infos du vehicule en meme temps
+ connection.query(
+ 'SELECT r.*, v.marque, v.modele, v.prix_journalier ' +
+ 'FROM reservations r ' +
+ 'JOIN vehicules v ON r.id_vehicule = v.id ' +
+ 'WHERE r.id_client = ?',
+ [req.session.client.id],
+ (err, reservations) => {
+ if (err) {
+ return res.status(500).send('Erreur requete');
+ }
+ res.render('mes-reservations', { reservations: reservations });
+ }
+ );
+ });
+});
+
+
 
 // ====================================================
 // EXPORT : on exporte app pour que server.js puisse l'utiliser
