@@ -1,16 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Location de vehicules</title>
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-   <h1>Bienvenue - Test connexion BDD</h1> 
-<!-- EJS : on boucle sur le tableau vehicules -->
-<% vehicules.forEach(function(v) { %>
- <p><%= v.marque %> <%= v.modele %> - <%= v.prix_journalier %> euros/jour</p>
-<% }); %>
-</body>
-</html>
+<%- include("header") %>
+
+<section class="hero">
+    <h1>Bienvenue chez LocAuto</h1>
+    <p>Trouvez le vehicule ideal pour vos deplacements a Mayotte</p>
+    <a href="/vehicules" class="btn-principal">Voir nos vehicules</a>
+</section>
+
+<%- include("footer") %>

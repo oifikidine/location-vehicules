@@ -13,6 +13,9 @@ const path = require('path');
 // express-session : pour gérer les sessions (garder un client connecte)
 const session = require('express-session');
 
+// multer : pour gérer l'envoi de fichier (images des vehicules)
+const multer = require('multer');
+
 // =======================================================
 // CREATION DE L'APPLICATION EXPRESS
 // =======================================================
@@ -31,6 +34,9 @@ app.set('view engine', 'ejs');
 // __dirname = le chemin du dossier où se trouve ce fichier (app.js)
 // path.join = colle les morceaux du chemin ensemble (gère les / et \ automatiquement)
 app.set('views', path.join(__dirname, 'views'));
+
+
+
 
 // ====================================================
 // MIDDLEWARES
@@ -64,6 +70,35 @@ app.use(session({
 }));
 
 
+// MIDDLEWARE GLOBAL : rendre la session accessible dans TOUTES les vues JavaScript — AVEC middleware
+// A placer APRES app.use(session(...)) et AVANT les routes
+app.use((req, res, next) => {
+ // res.locals = variables accessibles dans TOUS les fichiers EJS
+ res.locals.session = req.session;
+ next(); // next() = "passe a la suite" (la route ou le middleware suivant)
+});
+
+
+
+// ===================================================================================
+// CONFIGURATION DE MULTER pour lui dire ou stocker les images et comment les nommer:
+// ===================================================================================
+
+// On configure ou stocker les images et comment les nommer
+const stockage = multer.diskStorage({
+ // destination : le dossier ou sauvegarder les images
+ destination: function (req, file, cb) {
+ cb(null, path.join(__dirname, 'public/images'));
+ },
+ // filename : le nom du fichier sauvegarde
+ // On ajoute la date devant pour eviter les doublons
+ filename: function (req, file, cb) {
+ cb(null, Date.now() + '-' + file.originalname);
+ }
+});
+const upload = multer({ storage: stockage });
+
+
 // ====================================================
 // CONNEXION A LA BASE DE DONNEES MYSQL
 // ====================================================
@@ -76,26 +111,9 @@ const optionsConnexionBaseDeDonnees = {
 // Middleware de connexion : chaque requete aura accès à la BDD
 app.use(myConnection(mysql2, optionsConnexionBaseDeDonnees, 'pool'));
 
-// Route de test temporaire pour verifier la connexion BDD 
+// Route page d'accueil (pas besoin de BDD, juste afficher la page)
 app.get('/', (req, res) => {
- // req.getConnection vient du middleware express-myconnection
- req.getConnection((err, connection) => {
- if (err) {
- console.log('Erreur connexion BDD :', err);
- return res.send('Erreur de connexion a la base de donnees');
- }
- // On fait une requete simple pour tester
- connection.query('SELECT * FROM vehicules', (err, resultats) => {
- if (err) {
- console.log('Erreur requete :', err);
- return res.send('Erreur dans la requete SQL');
- }
- // On affiche les resultats dans le terminal
- console.log('Vehicules trouves :', resultats);
- // On envoie les resultats a la page EJS
- res.render('accueil', { vehicules: resultats });
- });
- });
+    res.render('accueil');
 });
 
 
@@ -276,6 +294,64 @@ app.get('/mes-reservations', (req, res) => {
  );
  });
 });
+
+
+// ROUTE : AJOUTER UN VEHICULE (depuis le modal)
+// upload.single('image') = multer recupere le fichier du champ "image"
+app.post('/vehicules/ajouter', upload.single('image'), (req, res) => {
+ const marque = req.body.marque;
+ const modele = req.body.modele;
+ const prix_journalier = req.body.prix_journalier;
+ // Si une image a ete envoyee, on prend son nom. Sinon, null
+ const image = req.file ? req.file.filename : null;
+ req.getConnection((err, connection) => {
+ if (err) { return res.status(500).send('Erreur serveur'); }
+ connection.query(
+ 'INSERT INTO vehicules (marque, modele, image, prix_journalier, disponible) VALUES (?, ?, ?, ?, 1)',
+ [marque, modele, image, prix_journalier],
+ (err, resultat) => {
+ if (err) {
+ console.log('Erreur ajout vehicule :', err);
+ return res.status(500).send('Erreur ajout');
+ }
+ res.redirect('/vehicules');
+ }
+ );
+ });
+});
+
+
+// ROUTE : DECONNEXION
+app.get('/deconnexion', (req, res) => {
+ // On detruit la session (on enleve le "bracelet")
+ req.session.destroy();
+ // On redirige vers la page d'accueil
+ res.redirect('/');
+});
+
+
+
+// ROUTE : ANNULER (SUPPRIMER) UNE RESERVATION JavaScript
+app.post('/reservation/supprimer', (req, res) => {
+ if (!req.session.client) {
+ return res.redirect('/connexion');
+ }
+ const id_reservation = req.body.id_reservation;
+ req.getConnection((err, connection) => {
+ if (err) { return res.status(500).send('Erreur serveur'); }
+ // DELETE = supprimer une ligne de la table
+ // On verifie que c'est bien le bon client (securite)
+ connection.query(
+ 'DELETE FROM reservations WHERE id = ? AND id_client = ?',
+ [id_reservation, req.session.client.id],
+ (err, resultat) => {
+ if (err) { return res.status(500).send('Erreur suppression'); }
+ res.redirect('/mes-reservations');
+ }
+ );
+ });
+});
+
 
 
 

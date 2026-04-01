@@ -1,6 +1,6 @@
-<h1>Creer un compte</h1> 
-<!-- method="POST" : on ENVOIE des donnees -->
-<!-- action="/inscription" : on les envoie a cette URL -->
+<!-- Inscription — Route GET : /inscription POST : /inscription --> 
+<%- include('header') %>
+<h1>Creer un compte</h1>
 <form method="POST" action="/inscription">
  <label for="nom">Nom :</label>
  <input type="text" id="nom" name="nom" required>
@@ -10,5 +10,7 @@
  <input type="email" id="email" name="email" required>
  <label for="mot_de_passe">Mot de passe :</label>
  <input type="password" id="mot_de_passe" name="mot_de_passe" required>
- <button type="submit">S inscrire</button>
+ <button type="submit">S'inscrire</button>
 </form>
+<p class="lien-bas">Deja un compte ? <a href="/connexion">Se connecter</a></p>
+<%- include('footer') %>

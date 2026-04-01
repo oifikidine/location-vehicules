@@ -1,30 +1,55 @@
-<!DOCTYPE html> 
-<html lang="fr">
-<head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>Nos Vehicules</title>
- <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
- <nav>
- <a href="/">Accueil</a>
- <a href="/vehicules">Vehicules</a>
- <a href="/inscription">Inscription</a>
- <a href="/connexion">Connexion</a>
- <a href="/mes-reservations">Mes reservations</a>
- </nav>
- <h1>Nos vehicules disponibles</h1>
- <div class="liste-vehicules">
- <!-- On boucle sur chaque vehicule -->
+<!-- Liste des vehicules — Route : GET /vehicules --> 
+<%- include('header') %>
+<h1>Nos vehicules disponibles</h1>
+<!-- Bouton pour ouvrir le modal d'ajout (si connecte) -->
+<% if (typeof session !== 'undefined' && session.client) { %>
+ <div class="actions-haut">
+ <button class="btn-principal" onclick="ouvrirModal('modal-ajout')">
+ + Ajouter un vehicule
+ </button>
+ </div>
+<% } %>
+<!-- On boucle sur chaque vehicule du tableau -->
+<div class="liste-vehicules">
  <% vehicules.forEach(function(v) { %>
  <div class="carte-vehicule">
- <img src="/images/<%= v.image %>" alt="<%= v.marque %> <%= v.modele %>">
+ <% if (v.image) { %>
+ <img src="/images/<%= v.image %>"
+ alt="<%= v.marque %> <%= v.modele %>">
+ <% } else { %>
+ <div class="pas-image">Pas de photo</div>
+ <% } %>
  <h2><%= v.marque %> <%= v.modele %></h2>
  <p class="prix"><%= v.prix_journalier %> euros / jour</p>
- <a href="/reservation/<%= v.id %>">Reserver</a>
+ <a href="/reservation/<%= v.id %>" class="btn-reserver">
+ Reserver
+ </a>
  </div>
  <% }); %>
+</div>
+<!-- ====== MODAL AJOUT VEHICULE ====== -->
+<!-- Un modal = une fenetre cachee qui s'affiche par dessus la page -->
+<!-- display:none par defaut dans le CSS, ouvrirModal() le met en flex -->
+<div id="modal-ajout" class="modal">
+ <div class="modal-contenu">
+ <span class="modal-fermer"
+ onclick="fermerModal('modal-ajout')">&times;</span>
+ <h2>Ajouter un vehicule</h2>
+ <!-- enctype="multipart/form-data" est OBLIGATOIRE pour les fichiers -->
+ <form method="POST" action="/vehicules/ajouter"
+ enctype="multipart/form-data">
+ <label for="marque">Marque :</label>
+ <input type="text" id="marque" name="marque" required>
+ <label for="modele">Modele :</label>
+ <input type="text" id="modele" name="modele" required>
+ <label for="prix_journalier">Prix par jour :</label>
+ <input type="number" id="prix_journalier"
+ name="prix_journalier" step="0.01" required>
+ <label for="image">Photo du vehicule :</label>
+ <input type="file" id="image" name="image" accept="image/*">
+ <button type="submit">Ajouter</button>
+ </form>
  </div>
-</body>
-</html>
+</div>
+<%- include('footer') %>
+

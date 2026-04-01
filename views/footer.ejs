@@ -1,0 +1,30 @@
+<!-- ======================================== -->
+<!-- FOOTER : inclus en bas de CHAQUE page -->
+<!-- avec  include('footer') -->
+<!-- ======================================== -->
+ </main>
+ <!-- Fin du contenu principal -->
+ <!-- ====== PIED DE PAGE ====== -->
+ <footer>
+ <p>2026 LocAuto - Projet Location de Vehicules | RSMA Mayotte</p>
+ </footer>
+ <!-- ====== SCRIPT POUR LES MODALS ====== -->
+ <script>
+ // Ouvrir un modal : on change son display de "none" a "flex"
+ function ouvrirModal(id) {
+ document.getElementById(id).style.display = 'flex';
+ }
+ // Fermer un modal : on remet display a "none"
+ function fermerModal(id) {
+ document.getElementById(id).style.display = 'none';
+ }
+ // Si on clique sur le fond sombre (en dehors de la boite blanche)
+ // ca ferme le modal
+ window.addEventListener('click', function(e) {
+ if (e.target.classList.contains('modal')) {
+ e.target.style.display = 'none';
+ }
+ });
+ </script>
+</body>
+</html>

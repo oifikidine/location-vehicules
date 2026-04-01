@@ -1,6 +1,11 @@
-<h1>Mes reservations</h1> EJS
+<!-- Mes reservations — Route : GET /mes-reservations -->
+<%- include('header') %>
+<h1>Mes reservations</h1>
 <% if (reservations.length === 0) { %>
- <p>Vous n avez pas encore de reservation.</p>
+ <div class="message-vide">
+ <p>Vous n'avez pas encore de reservation.</p>
+ <a href="/vehicules" class="btn-principal">Voir les vehicules</a>
+ </div>
 <% } else { %>
  <table>
  <thead>
@@ -9,17 +14,46 @@
  <th>Date debut</th>
  <th>Date fin</th>
  <th>Prix / jour</th>
+ <th>Action</th>
  </tr>
  </thead>
  <tbody>
  <% reservations.forEach(function(r) { %>
  <tr>
  <td><%= r.marque %> <%= r.modele %></td>
- <td><%= r.date_debut.toLocaleDateString('fr-FR') %></td>
- <td><%= r.date_fin.toLocaleDateString('fr-FR') %></td>
+ <td><%= new Date(r.date_debut).toLocaleDateString('fr-FR') %></td>
+ <td><%= new Date(r.date_fin).toLocaleDateString('fr-FR') %></td>
  <td><%= r.prix_journalier %> euros</td>
+ <td>
+ <button class="btn-annuler"
+ onclick="ouvrirModal('modal-<%= r.id %>')">
+ Annuler
+ </button>
+ </td>
  </tr>
+<!-- MODAL de confirmation pour CETTE reservation --> EJS — views/mes-reservations.ejs (partie 2)
+ <div id="modal-<%= r.id %>" class="modal">
+ <div class="modal-contenu">
+ <span class="modal-fermer"
+ onclick="fermerModal('modal-<%= r.id %>')">&times;</span>
+ <h2>Annuler cette reservation ?</h2>
+ <p>Voulez-vous vraiment annuler la reservation du
+ <strong><%= r.marque %> <%= r.modele %></strong> ?</p>
+ <form method="POST" action="/reservation/supprimer">
+ <input type="hidden" name="id_reservation"
+ value="<%= r.id %>">
+ <div class="modal-actions">
+ <button type="button" class="btn-secondaire"
+ onclick="fermerModal('modal-<%= r.id %>')">
+ Non, garder</button>
+ <button type="submit" class="btn-annuler">
+ Oui, annuler</button>
+ </div>
+ </form>
+ </div>
+ </div>
  <% }); %>
  </tbody>
  </table>
 <% } %>
+<%- include('footer') %>

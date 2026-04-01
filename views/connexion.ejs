@@ -1,4 +1,10 @@
-<h1>Se connecter</h1> 
+<!-- Connexion — Route GET : /connexion POST : /connexion -->
+<%- include('header') %>
+<h1>Se connecter</h1>
+<!-- Si la route a envoye un message d'erreur, on l'affiche -->
+<% if (typeof erreur !== 'undefined' && erreur) { %>
+ <p class="message-erreur"><%= erreur %></p>
+<% } %>
 <form method="POST" action="/connexion">
  <label for="email">Email :</label>
  <input type="email" id="email" name="email" required>
@@ -6,4 +12,6 @@
  <input type="password" id="mot_de_passe" name="mot_de_passe" required>
  <button type="submit">Se connecter</button>
 </form>
-<p>Pas encore de compte ? <a href="/inscription">S inscrire</a></p>
+<p class="lien-bas">Pas encore de compte ?
+ <a href="/inscription">S'inscrire</a></p>
+<%- include('footer') %>

@@ -1,0 +1,39 @@
+<!-- ======================================== -->
+<!-- HEADER : inclus en haut de CHAQUE page -->
+<!-- avec  include('header') -->
+<!-- ======================================== -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>LocAuto</title>
+ <!-- Un seul fichier CSS pour tout le site -->
+ <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<!-- ====== BARRE DE NAVIGATION ====== -->
+<nav>
+ <div class="nav-marque">
+ <a href="/">LocAuto</a>
+ </div>
+ <div class="nav-liens">
+ <a href="/">Accueil</a>
+ <a href="/vehicules">Vehicules</a>
+<!-- Si le client est connecte, on affiche son prenom -->
+ <!-- Sinon on affiche Inscription + Connexion -->
+ <% if (typeof session !== 'undefined' && session.client) { %>
+ <a href="/mes-reservations">Mes reservations</a>
+ <span class="nav-utilisateur">
+ Bonjour, <%= session.client.prenom %>
+ </span>
+ <a href="/deconnexion" class="btn-nav">Deconnexion</a>
+ <% } else { %>
+ <a href="/inscription">Inscription</a>
+ <a href="/connexion" class="btn-nav">Connexion</a>
+ <% } %>
+ </div>
+</nav>
+<!-- Debut du contenu principal -->
+<main>
+
