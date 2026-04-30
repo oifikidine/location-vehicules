@@ -30,7 +30,7 @@ nav {
 .nav-liens a:hover { color: #E8833A; }
 .nav-utilisateur { color: #E8833A; font-weight: bold; font-size: 14px; }
 .btn-nav {
- background-color: #E8833A; color: white !important;
+ background-color: #E8833A; color: rgb(255, 255, 255) !important;
  padding: 8px 16px; border-radius: 5px; font-weight: bold;
 }
 /* ====== HERO (accueil) ====== */ CSS — Hero + Boutons + Titres
